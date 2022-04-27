@@ -5,11 +5,12 @@ metadata:
 spec:
   params:
   - name: repo
+  - name: user
   steps:
   - image: alpine/git
     script: |
-      git clone $(params.repo)
-      ls web-app-demo
+      git clone https://github.com/$(params.user)/$(params.repo)
+      ls $(params.repo)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TaskRun
@@ -20,4 +21,6 @@ spec:
     name: clone
   params:
   - name: repo
-    value: https://github.com/lbernick/web-app-demo
+    value: web-app-demo
+  - name: user
+    value: lbernick
