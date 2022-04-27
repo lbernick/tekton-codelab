@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: clone
+spec:
+  params:
+  - name: repo
+  steps:
+  - image: alpine/git
+    script: |
+      git clone $(params.repo)
+      ls web-app-demo
+---
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: clone-run
+spec:
+  taskRef:
+    name: clone
+  params:
+  - name: repo
+    value: https://github.com/lbernick/web-app-demo
