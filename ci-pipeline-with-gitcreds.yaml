@@ -1,0 +1,58 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ci-pipeline-with-gitcreds
+spec:
+  workspaces:
+  - name: source-code
+  - name: gitcreds
+  params:
+  - name: image
+  tasks:
+  - name: clone
+    taskRef:
+      name: git-clone
+      bundle: gcr.io/tekton-releases/catalog/upstream/git-clone:0.6
+    workspaces:
+    - name: output
+      workspace: source-code
+    - name: basic-auth
+      workspace: gitcreds
+    params:
+    - name: url
+      value: https://github.com/lbernick/web-app-demo  # Replace with your fork
+  - name: build
+    taskRef:
+      name: docker-build
+      bundle: gcr.io/tekton-releases/catalog/upstream/docker-build:0.1
+    workspaces:
+    - name: source
+      workspace: source-code
+    params:
+    - name: image
+      value: $(params.image)
+    runAfter:
+    - clone
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: ci-pipeline-run
+spec:
+  pipelineRef:
+    name: ci-pipeline
+  params:
+  - name: image
+    value: gcr.io/leebernick-test/web-app-demo
+  workspaces:
+  - name: source-code
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: gitcreds
+    secret:
+      secretName: gitcreds

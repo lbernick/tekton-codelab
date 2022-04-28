@@ -1,0 +1,76 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ci-pipeline-with-tests
+spec:
+  workspaces:
+  - name: source-code
+  params:
+  - name: image
+  tasks:
+  - name: clone
+    taskRef:
+      name: git-clone
+      bundle: gcr.io/tekton-releases/catalog/upstream/git-clone:0.6
+    workspaces:
+    - name: output
+      workspace: source-code
+    params:
+    - name: url
+      value: https://github.com/lbernick/web-app-demo
+  - name: build
+    taskRef:
+      name: docker-build
+      bundle: gcr.io/tekton-releases/catalog/upstream/docker-build:0.1
+    workspaces:
+    - name: source
+      workspace: source-code
+    params:
+    - name: image
+      value: $(params.image)
+    runAfter:
+    - clone
+  - name: lint
+    params:
+    - name: image
+      value: $(params.image)
+    taskSpec:
+      params:
+      - name: image
+      steps:
+      - image: $(params.image)
+        command: ["black", "src", "--check"]
+    runAfter:
+    - build
+  - name: unit-test
+    params:
+    - name: image
+      value: $(params.image)
+    taskSpec:
+      params:
+      - name: image
+      steps:
+      - image: $(params.image)
+        command: ["python", "-m", "pytest"]
+    runAfter:
+    - build
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: ci-pipeline-with-tests-run
+spec:
+  pipelineRef:
+    name: ci-pipeline-with-tests
+  params:
+  - name: image
+    value: gcr.io/leebernick-test/web-app-demo
+  workspaces:
+  - name: source-code
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
