@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: remote-ci-pipeline-run
+spec:
+  pipelineRef:
+    resolver: git
+    resource:
+    - name: url
+      value: https://github.com/lbernick/tekton-codelab.git
+    - name: path
+      value: basic-ci-pipeline.yaml
+    - name: branch
+      value: main
+  params:
+  - name: image
+    value: gcr.io/leebernick-test/web-app-demo
+  workspaces:
+  - name: source-code
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
