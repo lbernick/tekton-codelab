@@ -13,7 +13,10 @@ Contents:
     CI pipeline so that it can be used with a private Git repository. This also requires
     creating a Kubernetes [secret](https://kubernetes.io/docs/concepts/configuration/secret/)
     to store GitHub credentials.
+  - **remote-ci-pipeline.yaml**: A PipelineRun which runs the Pipeline defined in basic-ci-pipeline.yaml.
+    This requires installing [Tekton remote resolution](https://github.com/tektoncd/resolution#install)
+    and the [git resolver](https://github.com/tektoncd/resolution/tree/main/gitresolver#install).
 
 Setup required:
 - Install Tekton Pipelines and [configure feature flags](https://tekton.dev/docs/pipelines/install/#customizing-the-pipelines-controller-behavior)
-  to enable OCI bundles and other alpha features.
+  to enable OCI bundles and alpha features.
