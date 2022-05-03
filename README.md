@@ -13,6 +13,10 @@ Contents:
     CI pipeline so that it can be used with a private Git repository. This also requires
     creating a Kubernetes [secret](https://kubernetes.io/docs/concepts/configuration/secret/)
     to store GitHub credentials.
+  - **ci-pipeline-with-notify.yaml**: A Task that posts a message to Google chat, and a Pipeline
+    and PipelineRun that modify the basic CI pipeline to notify Google chat with the status of
+    the build. Requires [Workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+    to be configured on the cluster.
   - **remote-ci-pipeline.yaml**: A PipelineRun which runs the Pipeline defined in basic-ci-pipeline.yaml.
     This requires installing [Tekton remote resolution](https://github.com/tektoncd/resolution#install)
     and the [git resolver](https://github.com/tektoncd/resolution/tree/main/gitresolver#install).
