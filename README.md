@@ -1,20 +1,6 @@
 This repo contains example Tekton Tasks and Pipelines to run CI/CD for a Dockerized application.
 
 Contents:
-```bash
-kubernetes-intro
-├─── dogfooding
-│   ├── cleanup
-│   │   ├── kustomization.yaml
-│   │   ├── default-nightly
-│   │   │   ├── README.md
-│   │   │   ├── cronjob.yaml
-│   │   │   └── kustomization.yaml
-│   │   └── *mynamespace-nightly*
-│   │       ├── README.md
-│   │       ├── cronjob.yaml
-│   │       └── kustomization.yaml
-```
 - **kubernetes-intro**: simple Kubernetes API resource examples to experiment with
 - **tekton-intro**: simple Tekton API resource examples to experiment with
 - **docker-ci-example**: sample CI pipelines for a Dockerized web app.
