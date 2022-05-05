@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: notify-google-chat
+spec:
+  params:
+  - name: webhook-url
+  - name: message
+  steps:
+  - name: notify
+    image: gcr.io/leebernick-test/python-httplib # Docker image with python deps installed
+    script: |
+      #!/usr/bin/env python3
+      from json import dumps
+      from httplib2 import Http
+
+      def main():
+          """Hangouts Chat incoming webhook quickstart."""
+          url = '$(params.webhook-url)'
+          bot_message = {
+              'text' : "$(params.message)"}
+
+          message_headers = {'Content-Type': 'application/json; charset=UTF-8'}
+
+          http_obj = Http()
+
+          response = http_obj.request(
+              uri=url,
+              method='POST',
+              headers=message_headers,
+              body=dumps(bot_message),
+          )
+
+          print(response)
+
+      if __name__ == '__main__':
+          main()

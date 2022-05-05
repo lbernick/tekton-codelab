@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ci-pipeline-with-gitcreds
+spec:
+  workspaces:
+  - name: source-code
+  - name: gitcreds
+  params:
+  - name: image
+  - name: registry
+  tasks:
+  - name: clone
+    taskRef:
+      name: git-clone
+      bundle: gcr.io/tekton-releases/catalog/upstream/git-clone:0.6
+    workspaces:
+    - name: output
+      workspace: source-code
+    - name: ssh-directory
+      workspace: gitcreds
+    params:
+    - name: url
+      value: https://github.com/lbernick/web-app-demo  # Replace with your fork
+  - name: build
+    taskRef:
+      name: docker-build
+    workspaces:
+    - name: source
+      workspace: source-code
+    params:
+    - name: image
+      value: $(params.image)
+    - name: registry
+      value: $(params.registry)
+    runAfter:
+    - clone

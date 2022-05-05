@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: full-ci-pipeline-run
+spec:
+  pipelineRef:
+    resolver: git
+    resource:
+    - name: url
+      value: https://github.com/lbernick/tekton-codelab.git
+    - name: path
+      value: full-ci-pipeline/pipeline.yaml
+    - name: branch
+      value: main
+  params:
+  - name: image
+    value: us-east1-docker.pkg.dev/leebernick-test/codelab/web-app-demo
+  - name: registry
+    value: us-east1-docker.pkg.dev
+  - name: chat-webhook-url
+    value: https://chat.googleapis.com/v1/spaces/AAAAGDLkJiM/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=PJjU6o5bxDsarG_hgl6U6ZqOb8EM_L8DX3Lp5FhIVTQ%3D
+  workspaces:
+  - name: source-code
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: gitcreds
+    secret:
+      secretName: git-ssh-creds
+  serviceAccountName: codelab # defined in serviceaccount.yaml

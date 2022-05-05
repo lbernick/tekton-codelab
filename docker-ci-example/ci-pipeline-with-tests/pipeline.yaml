@@ -1,0 +1,58 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ci-pipeline-with-tests
+spec:
+  workspaces:
+  - name: source-code
+  params:
+  - name: image
+  - name: registry
+  tasks:
+  - name: clone
+    taskRef:
+      name: git-clone
+      bundle: gcr.io/tekton-releases/catalog/upstream/git-clone:0.6
+    workspaces:
+    - name: output
+      workspace: source-code
+    params:
+    - name: url
+      value: https://github.com/lbernick/web-app-demo
+  - name: build
+    taskRef:
+      name: docker-build
+    workspaces:
+    - name: source
+      workspace: source-code
+    params:
+    - name: image
+      value: $(params.image)
+    - name: registry
+      value: $(params.registry)
+    runAfter:
+    - clone
+  - name: lint
+    params:
+    - name: image
+      value: $(params.image)
+    taskSpec:
+      params:
+      - name: image
+      steps:
+      - image: $(params.image)
+        command: ["black", "src", "--check"]
+    runAfter:
+    - build
+  - name: unit-test
+    params:
+    - name: image
+      value: $(params.image)
+    taskSpec:
+      params:
+      - name: image
+      steps:
+      - image: $(params.image)
+        command: ["python", "-m", "pytest"]
+    runAfter:
+    - build

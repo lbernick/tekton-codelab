@@ -1,12 +1,15 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: ci-pipeline-with-tests
+  name: full-ci-pipeline
 spec:
   workspaces:
   - name: source-code
+  - name: gitcreds
   params:
   - name: image
+  - name: registry
+  - name: chat-webhook-url
   tasks:
   - name: clone
     taskRef:
@@ -15,19 +18,22 @@ spec:
     workspaces:
     - name: output
       workspace: source-code
+    - name: ssh-directory
+      workspace: gitcreds
     params:
     - name: url
       value: https://github.com/lbernick/web-app-demo
   - name: build
     taskRef:
       name: docker-build
-      bundle: gcr.io/tekton-releases/catalog/upstream/docker-build:0.1
     workspaces:
     - name: source
       workspace: source-code
     params:
     - name: image
       value: $(params.image)
+    - name: registry
+      value: $(params.registry)
     runAfter:
     - clone
   - name: lint
@@ -54,23 +60,12 @@ spec:
         command: ["python", "-m", "pytest"]
     runAfter:
     - build
----
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: ci-pipeline-with-tests-run
-spec:
-  pipelineRef:
-    name: ci-pipeline-with-tests
-  params:
-  - name: image
-    value: gcr.io/leebernick-test/web-app-demo
-  workspaces:
-  - name: source-code
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
+  finally:
+  - name: notify
+    taskRef:
+      name: notify-google-chat
+    params:
+    - name: webhook-url
+      value: $(params.chat-webhook-url)
+    - name: message
+      value: "Build status: $(tasks.build.status); Lint status: $(tasks.lint.status); Test status: $(tasks.unit-test.status)"

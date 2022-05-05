@@ -9,12 +9,14 @@ spec:
     - name: url
       value: https://github.com/lbernick/tekton-codelab.git
     - name: path
-      value: basic-ci-pipeline.yaml
+      value: basic-ci-pipeline/pipeline.yaml
     - name: branch
       value: main
   params:
   - name: image
-    value: gcr.io/leebernick-test/web-app-demo
+    value: us-east1-docker.pkg.dev/leebernick-test/codelab/web-app-demo
+  - name: registry
+    value: us-east1-docker.pkg.dev
   workspaces:
   - name: source-code
     volumeClaimTemplate:
@@ -24,3 +26,6 @@ spec:
         resources:
           requests:
             storage: 1Gi
+  serviceAccountNames:
+  - taskName: build
+    serviceAccountName: codelab # defined in serviceaccount.yaml

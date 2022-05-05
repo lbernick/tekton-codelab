@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: ci-pipeline-with-gitcreds-run
+spec:
+  pipelineRef:
+    name: ci-pipeline-with-gitcreds
+  params:
+  - name: image
+    value: us-east1-docker.pkg.dev/leebernick-test/codelab/web-app-demo
+  - name: registry
+    value: us-east1-docker.pkg.dev
+  workspaces:
+  - name: source-code
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: gitcreds
+    secret:
+      secretName: git-ssh-creds
+  serviceAccountNames:
+  - taskName: build
+    serviceAccountName: codelab # defined in serviceaccount.yaml
