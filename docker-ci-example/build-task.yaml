@@ -1,4 +1,4 @@
-# This task is copied from the catalog, plus a small bug fix.
+# This task is copied from the catalog, plus some bug fixes.
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
@@ -116,23 +116,3 @@ spec:
   volumes:
   - name: dind-certs
     emptyDir: {}
----
-apiVersion: tekton.dev/v1beta1
-kind: TaskRun
-metadata:
-  name: build-and-push-run
-spec:
-  #debug:
-    #breakpoint: ["onFailure"]
-  serviceAccountName: codelab-builder
-  taskRef:
-    name: docker-build
-  params:
-  - name: registry
-    value: us-east1-docker.pkg.dev
-  - name: image
-    value: us-east1-docker.pkg.dev/leebernick-test/codelab/web-app-demo
-  workspaces:
-  - name: source
-    persistentVolumeClaim:
-      claimName: pvc-2942e334e6
